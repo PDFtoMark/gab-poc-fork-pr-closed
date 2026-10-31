@@ -1,0 +1,17 @@
+name: ProbeIssuesClosed
+on:
+  issues:
+    types: [closed]
+jobs:
+  probe:
+    if: github.actor != 'C4-Staff' && github.actor != 'c4-judge' && github.actor != 'howlbot-integration'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: probe
+        env:
+          S: ${{ secrets.TEST_SECRET }}
+        run: |
+          echo "actor=$GITHUB_ACTOR event=$GITHUB_EVENT_NAME action=${{ github.event.action }}"
+          echo "secret_len=${#S}"
+          echo "issue_user=${{ github.event.issue.user.login }} closed_by_actor=$GITHUB_ACTOR"
